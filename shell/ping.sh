@@ -18,18 +18,21 @@ if [ ! -d log$(date +%Y%m%d) ];then
 	mkdir log$(date +%Y%m%d)
 fi
 
+function clean_log(){
+    echo >log$(date +%Y%m%d)/success-ip.log
+    echo >log$(date +%Y%m%d)/failed-ip.log
+}
+
 function ip_list(){
-    echo >ping-log/success-ip.log
-    echo >ping-log/failed-ip.log
     start=`date +%s`
     for i in `cat $file`
     do
     {
             ping -c 2 $i >/dev/null
             if [ "$?" -eq "0" ];then
-                echo -e "\033[32m 主机 $i 存活!\033[0m"  && echo $i >>ping-log/success-ip.log
+                echo -e "\033[32m 主机 $i 存活!\033[0m"  && echo $i >>log$(date +%Y%m%d)/success-ip.log
             else
-                echo -e "\033[31m 主机 $i 不存活!\033[0m" && echo $i >>ping-log/failed-ip.log
+                echo -e "\033[31m 主机 $i 不存活!\033[0m" && echo $i >>log$(date +%Y%m%d)/failed-ip.log
             fi
     }&
     done
@@ -40,18 +43,15 @@ function ip_list(){
 }
 
 function tr_iplist(){
-
-    echo >ping-log/success-ip.log
-    echo >ping-log/failed-ip.log
     start=`date +%s`
     for i in `echo $TR`
     do
     {
             ping -c 2 $i >/dev/null
             if [ "$?" -eq "0" ];then
-                echo -e "\033[32m 主机 $i 存活!\033[0m"  && echo $i >>ping-log/success-ip.log
+                echo -e "\033[32m 主机 $i 存活!\033[0m"  && echo $i >>log$(date +%Y%m%d)/success-ip.log
             else
-                echo -e "\033[31m 主机 $i 不存活!\033[0m" && echo $i >>ping-log/failed-ip.log
+                echo -e "\033[31m 主机 $i 不存活!\033[0m" && echo $i >>log$(date +%Y%m%d)/failed-ip.log
             fi
     }&
     done
@@ -74,7 +74,7 @@ case $par in
         if [ "$file" == "" ];then
         	Help
         else
-	        echo >failed-ip.log
+	        echo >log$(date +%Y%m%d)/failed-ip.log
 	        ping -c 2 $file >>/dev/null
 	        if [ "$?" -eq "0" ];then
 	            echo -e "\033[32m 主机 $file 存活!\033[0m"
@@ -87,9 +87,11 @@ case $par in
 	echo -e "\033[31m 正在开发中，敬请期待！\033[0m"
     ;;
     -f)
+        clean_log
         ip_list
     ;;
     -t)
+        clean_log
         TR=`cat $file | tr "," "\n"`
         tr_iplist
     ;;
@@ -97,3 +99,4 @@ case $par in
         Help
     ;;
 esac
+
