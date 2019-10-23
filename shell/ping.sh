@@ -1,8 +1,8 @@
 #!/bin/bash
 # Author: ZHH
 # Create Date: 2019-04-22 15:40:51
-# Last Modified: 2019-10-20 15:53:00
-# Version: V2.3
+# Last Modified: 2019-10-23 22:20:00
+# Version: V2.4
 # Description: Multithread Ping
 ##################################################################
 ###新增内容：
@@ -17,15 +17,20 @@ file=$2
 
 
 function catalog(){
-    if [ ! -d log$(date +%Y%m%d) ];then
-        mkdir log$(date +%Y%m%d)
+    if [ ! -d log_ping ];then
+        mkdir log_ping
     fi
 }
 
 
-function clean_log(){
-    echo >log$(date +%Y%m%d)/success-ip.log
-    echo >log$(date +%Y%m%d)/failed-ip.log
+function date_log(){
+    time=`date +%Y/%m/%d-%T`
+    echo "==============================================" >>log_ping/success-ip.log
+    echo $time >>log_ping/success-ip.log
+    echo "==============================================" >>log_ping/success-ip.log
+    echo "==============================================" >>log_ping/failed-ip.log
+    echo $time >>log_ping/failed-ip.log
+    echo "==============================================" >>log_ping/failed-ip.log
 }
 
 function ip_list(){
@@ -35,9 +40,9 @@ function ip_list(){
     {
             ping -c 2 $i >/dev/null
             if [ "$?" -eq "0" ];then
-                echo -e "\033[32m 主机 $i 存活!\033[0m"  && echo $i >>log$(date +%Y%m%d)/success-ip.log
+                echo -e "\033[32m 主机 $i 存活!\033[0m"  && echo $i >>log_ping/success-ip.log
             else
-                echo -e "\033[31m 主机 $i 不存活!\033[0m" && echo $i >>log$(date +%Y%m%d)/failed-ip.log
+                echo -e "\033[31m 主机 $i 不存活!\033[0m" && echo $i >>log_ping/failed-ip.log
             fi
     }&
     done
@@ -54,9 +59,9 @@ function tr_iplist(){
     {
             ping -c 2 $i >/dev/null
             if [ "$?" -eq "0" ];then
-                echo -e "\033[32m 主机 $i 存活!\033[0m"  && echo $i >>log$(date +%Y%m%d)/success-ip.log
+                echo -e "\033[32m 主机 $i 存活!\033[0m"  && echo $i >>log_ping/success-ip.log
             else
-                echo -e "\033[31m 主机 $i 不存活!\033[0m" && echo $i >>log$(date +%Y%m%d)/failed-ip.log
+                echo -e "\033[31m 主机 $i 不存活!\033[0m" && echo $i >>log_ping/failed-ip.log
             fi
     }&
     done
@@ -73,9 +78,9 @@ function segment(){
     {
         ping -c 2 $file.$i >/dev/null
         if [ "$?" -eq "0" ];then
-            echo -e "\033[32m 主机 $file.$i 存活!\033[0m"  && echo $file.$i >>log$(date +%Y%m%d)/success-ip.log
+            echo -e "\033[32m 主机 $file.$i 存活!\033[0m"  && echo $file.$i >>log_ping/success-ip.log
         else
-            echo -e "\033[31m 主机 $file.$i 不存活!\033[0m" && echo $file.$i >>log$(date +%Y%m%d)/failed-ip.log
+            echo -e "\033[31m 主机 $file.$i 不存活!\033[0m" && echo $file.$i >>log_ping/failed-ip.log
         fi
     }&
     done
@@ -108,18 +113,18 @@ case $par in
     ;;
     -s)
         catalog
-        clean_log
+        date_log
         segment
 	    #echo -e "\033[31m 正在开发中，敬请期待！\033[0m"
     ;;
     -f)
         catalog
-        clean_log
+        date_log
         ip_list
     ;;
     -t)
         catalog
-        clean_log
+        date_log
         TR=`cat $file | tr "," "\n"`
         tr_iplist
     ;;
